@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>
+Convesation Sample
+</title>
+</head>
+<body>
+<H3> Conversation </H3>
+
+<button name="act" text="dd" onclick="convinit()")>clear</button>
+<button name="act" text="dd" onclick="outputclear()")>ClearOutputArea</button>
+<button name="act" text="dd" onclick="inputclear()")>ClearInputArea</button>
+<br>
+<div id="stat"></div>
+<hr>
+<div id="output"></div>
+
+Input: 
+<input  id="input" type="text" value="" size="80">
+<button name="act" text="dd" onclick="conv()")>conv</button>
+
+<script type='text/javascript' >
+ var wsUri = "ws://localhost:8080"
+ var output = document.getElementById("output");
+ var rjson={context: {}};
+ var payload={};
+ var websocket;
+ 
+ function convinit()
+ {
+     websocket = new WebSocket(wsUri);
+     websocket.onopen = function() {document.getElementById("stat").innerHTML = "Connected";}
+     websocket.onmessage =  function(evt) { 
+	 rjson = JSON.parse(evt.data);
+	 for (i = 0;i<rjson.output.text.length;i++) {
+    	     writeToScreen('<span style="color: green;"><div align="right">' + rjson.output.text[i] +'</div></span>'); 
+	 }
+	 
+     }
+ }
+
+ function conv() {
+
+     payload.input = {"text": document.getElementById("input").value.trim()};
+     payload.context = rjson.context;
+     writeToScreen(payload.input.text);
+     websocket.send( JSON.stringify(payload));
+     return false;
+ }
+
+ function writeToScreen(message)
+ {
+     var pre = document.createElement("p");
+     pre.style.wordWrap = "break-word";
+     pre.innerHTML = message;
+     output.appendChild(pre);
+ }
+
+ function outputclear() {
+     output.innerHTML = "<div></div>"
+ }
+
+ function inputclear() {
+     document.getElementById("input").value="";
+ }
+ window.addEventListener("load", convinit, false);
+</script>
+</body>
+</html>
+
